@@ -1,0 +1,37 @@
+# Build
+build/
+*.o
+*.d
+*.dylib
+pocket-moe
+DerivedData/
+
+# Model weights
+models/
+*.onnx
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# IDE
+.vscode/
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (weight extraction scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Profiling
+*.trace
+*.dtrace
+*.instruments
