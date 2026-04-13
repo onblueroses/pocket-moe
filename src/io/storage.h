@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// Parallel pread() via GCD for expert chunk loading.
+// Parallel pread() via thread pool for expert chunk loading.
 // Reads multiple expert chunks concurrently from the expert weight file.
 //
 // fd: file descriptor for the expert weight file (opened with O_RDONLY)
@@ -21,5 +21,10 @@ int storage_parallel_pread(int fd, const uint64_t *offsets,
 // Uses mincore() to check which pages are in cache.
 // Returns fraction [0.0, 1.0] of pages resident.
 double storage_cache_residency(const void *addr, uint64_t length);
+
+// Prefetch a memory region into page cache.
+// Uses madvise(MADV_WILLNEED) to trigger async kernel readahead.
+// Non-blocking: returns immediately, kernel fetches in background.
+int storage_prefetch(const void *addr, uint64_t length);
 
 #endif // POCKET_MOE_STORAGE_H

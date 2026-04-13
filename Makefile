@@ -1,6 +1,14 @@
 CC = gcc
 CFLAGS = -O3 -Wall -Wextra -std=c17 -D_GNU_SOURCE
-LDFLAGS = -luring -lvulkan -lm -lpthread
+# io_uring is optional (Linux-only optimization, blocked on Android via seccomp)
+LDFLAGS = -lvulkan -lm -lpthread
+
+# Detect io_uring availability (Linux native builds only, not Android)
+HAS_URING := $(shell pkg-config --exists liburing 2>/dev/null && echo 1 || echo 0)
+ifeq ($(HAS_URING),1)
+  CFLAGS_URING = -DHAS_IO_URING
+  LDFLAGS_URING = -luring
+endif
 
 # ggml (added as submodule, built separately)
 GGML_DIR = ggml
@@ -24,11 +32,11 @@ TARGET = $(BUILD_DIR)/pocket-moe
 all: ggml $(TARGET)
 
 $(TARGET): $(C_OBJS) $(GGML_LIB)
-	$(CC) -o $@ $(C_OBJS) $(GGML_LIB) $(LDFLAGS)
+	$(CC) -o $@ $(C_OBJS) $(GGML_LIB) $(LDFLAGS) $(LDFLAGS_URING)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(GGML_INC) -I$(SRC_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_URING) $(GGML_INC) -I$(SRC_DIR) -c $< -o $@
 
 ggml:
 	@if [ ! -d "$(GGML_DIR)" ]; then \

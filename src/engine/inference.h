@@ -28,7 +28,7 @@ typedef struct {
     int32_t group_size;          // quantization group size (e.g. 128)
 } ModelConfig;
 
-// Thermal state (mirrors iOS ProcessInfo.ThermalState)
+// Thermal state (platform-abstracted: sysfs on Linux, AThermal on Android)
 typedef enum {
     THERMAL_NOMINAL = 0,
     THERMAL_FAIR = 1,

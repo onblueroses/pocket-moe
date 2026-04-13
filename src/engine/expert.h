@@ -18,7 +18,7 @@ typedef struct ExpertPool ExpertPool;
 ExpertPool *expert_pool_create(const char *expert_file, const ModelConfig *config);
 void expert_pool_free(ExpertPool *pool);
 
-// Load experts for one layer. Dispatches parallel pread() via GCD.
+// Load experts for one layer. Dispatches parallel reads via platform I/O backend.
 // expert_indices: array of num_active expert IDs selected by router
 // Returns pointers to expert weight data (may be from page cache or fresh read).
 int expert_pool_load(ExpertPool *pool, int32_t layer_idx,
@@ -26,11 +26,12 @@ int expert_pool_load(ExpertPool *pool, int32_t layer_idx,
                      const void **expert_weights_out,
                      int32_t *cache_hits_out, int32_t *cache_misses_out);
 
-// Expert forward pass on Metal GPU with FMA dequant
+// Expert forward pass on Vulkan GPU via ggml
 // input: [hidden_size] float16
 // output: [hidden_size] float16 (accumulated from all active experts)
-int expert_forward_metal(const void **expert_weights, int32_t num_active,
-                         const void *input, void *output,
-                         const ModelConfig *config);
+int expert_forward(const void **expert_weights, int32_t num_active,
+                   const float *expert_weights_softmax,
+                   const void *input, void *output,
+                   const ModelConfig *config);
 
 #endif // POCKET_MOE_EXPERT_H
